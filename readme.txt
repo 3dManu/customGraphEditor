@@ -1,17 +1,19 @@
-Maya�p�J�X�^���O���t�G�f�B�^�[�ł��B
+Maya用カスタムグラフエディターです。
 
-�_�E�����[�h�͉E��̗ΐF��Clone or download��Download zip����ł���Ǝv���܂��B
+ダウンロードは右上の緑色のClone or downloadのDownload zipからできると思います。
 
-�N���R�}���h�́AcustomGraphEditor�̃t�H���_����maya>script�̒��ɓ����
+フォルダ名をcustomGraphEditor-masterからcustomGraphEditorに変更します。
+
+customGraphEditorのフォルダごとmaya>scriptの中に入れて
 
 from customGraphEditor import UI
 
 UI.main()
 
-��python�œ��͂���΋N���ł��܂��B
+とpythonで入力すれば起動できます。
 
 #####################################################
 
-���̃X�N���v�g���g�p���Đ������g���u���⑹�Q�Ɋւ��܂��Ă͍�҂͈�ؐӔC�͕����܂���B �m�l���m�ł̍Ĕz�z�͖��Ȃ��ł����A�l�b�g���Ĕz�z�Ȃǂ͂��������������B
+このスクリプトを使用して生じたトラブルや損害に関しましては作者は一切責任は負いません。 知人同士での再配布は問題ないですが、ネット等再配布などはご遠慮ください。
 
 #####################################################
