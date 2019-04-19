@@ -140,7 +140,7 @@ class MainWindow(QMainWindow):
 		self.initUI()
 	
 	def initUI(self):
-		panelname = "customGraphEditor"
+		panelname = "graphEditor1"
 		widget = QWidget(self)
 		vlay = QVBoxLayout(self)
 		self.graphEditor = GraphEditor(self,panelname)
