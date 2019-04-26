@@ -172,6 +172,19 @@ class infinityEditorWidget(QWidget):
 		self.poiLinButton.setIcon(poiLinIcon)
 		self.poiConButton.setIcon(poiConIcon)
 		
+		iconSize = QSize(20,20)
+		self.priCycButton.setIconSize(iconSize)
+		self.priCyOButton.setIconSize(iconSize)
+		self.priOscButton.setIconSize(iconSize)
+		self.priLinButton.setIconSize(iconSize)
+		self.priConButton.setIconSize(iconSize)
+		
+		self.poiCycButton.setIconSize(iconSize)
+		self.poiCyOButton.setIconSize(iconSize)
+		self.poiOscButton.setIconSize(iconSize)
+		self.poiLinButton.setIconSize(iconSize)
+		self.poiConButton.setIconSize(iconSize)
+		
 		btnHSize = 22
 		btnWSize = 22
 		self.priCycButton.setFixedSize(btnHSize,btnWSize)
