@@ -70,14 +70,14 @@ class TanSliderWidget(QWidget):
 		self.boxSlider = boxSliderWidget.BoxSliderWidget(self,-90,90)
 		self.boxSlider.funcValueChanged = self.changed_editor
 		
-		# mayaä¸Šã‹ã‚‰å€¤ã‚’æ‹¾ã£ã¦ã„ã‚‹
+		# mayaã‚©‚ç’l‚ğE‚Á‚Ä‚¢‚é
 		if editTangent.check_animation():
 			self.set_ui_value(1)
 		else:
 			self.boxSlider.slider.setValue(0)
 			self.boxSlider.dspinBox.setValue(0)
 
-		#ã€€ãƒ©ã‚¸ã‚ªãƒœã‚¿ãƒ³ã¨ã‹
+		#@ƒ‰ƒWƒIƒ{ƒ^ƒ“‚Æ‚©
 		self.radioIo_A = QRadioButton('both',self)
 		self.radioIo_A.setChecked(True)
 		self.radioIo_B = QRadioButton('in',self)
@@ -95,7 +95,7 @@ class TanSliderWidget(QWidget):
 
 		self.radioIoGroup.buttonClicked[int].connect(self.set_ui_value)
 
-		# ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆæ±ºã‚
+		# ƒŒƒCƒAƒEƒgŒˆ‚ß
 		self.vLayout = QVBoxLayout()
 
 		self.hLayout_A = QHBoxLayout()
@@ -146,14 +146,14 @@ class WgtSliderWidget(TanSliderWidget):
 		self.boxSlider = boxSliderWidget.BoxSliderWidget(self,0,100)
 		self.boxSlider.funcValueChanged = self.changed_editor
 		
-		# mayaä¸Šã‹ã‚‰å€¤ã‚’æ‹¾ã£ã¦ã„ã‚‹
+		# mayaã‚©‚ç’l‚ğE‚Á‚Ä‚¢‚é
 		if editTangent.check_animation():
 			self.set_ui_value(1)
 		else:
 			self.boxSlider.slider.setValue(0)
 			self.boxSlider.dspinBox.setValue(0)
 
-		#ã€€ãƒ©ã‚¸ã‚ªãƒœã‚¿ãƒ³ã¨ã‹
+		#@ƒ‰ƒWƒIƒ{ƒ^ƒ“‚Æ‚©
 		self.radioIo_A = QRadioButton('both',self)
 		self.radioIo_A.setChecked(True)
 		self.radioIo_B = QRadioButton('in',self)
@@ -175,7 +175,7 @@ class WgtSliderWidget(TanSliderWidget):
 		self.set_weight_checkBox()
 		self.checkBox.stateChanged.connect(editTangent.toggle_wieghtTangent)
 
-		# ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆæ±ºã‚
+		# ƒŒƒCƒAƒEƒgŒˆ‚ß
 		self.vLayout = QVBoxLayout()
 
 		self.hLayout_A = QHBoxLayout()
@@ -224,7 +224,7 @@ class WgtSliderWidget(TanSliderWidget):
 
 
 def main():
-	mayaWindow = 'graphEditor1Window' #å¸¸ã«ã“ã®ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚ˆã‚Šå‰ã«ã„ã¾ã™
+	mayaWindow = 'graphEditor1Window' #í‚É‚±‚ÌƒEƒBƒ“ƒhƒE‚æ‚è‘O‚É‚¢‚Ü‚·
 	ptr = OpenMayaUI.MQtUtil.findWindow(mayaWindow)
 	if ptr is not None:
 		parent = wrapInstance(long(ptr),QWidget)

@@ -4,14 +4,16 @@ from maya import OpenMayaUI as omui
 from maya.app.general import mayaMixin
 
 from .tangentEditor import tanEditorUI
-from .ScaleKeyTool import ScaleKeyUI
+from .keysEditFromBuffer import keysEditFromBufferUI
+from .scaleKeysEditor import scaleKeysEditorUI
 from .filterGraphEditor import filterGEUI
 from .selectionCurveSorce import sorceButton
 from .infinityCurveEditor import infinityEditorUI
 reload(infinityEditorUI)
 reload(sorceButton)
 reload(tanEditorUI)
-reload(ScaleKeyUI)
+reload(scaleKeysEditorUI)
+reload(keysEditFromBufferUI)
 reload(filterGEUI)
 
 try:
@@ -71,19 +73,30 @@ class AddToolWidget(QWidget):
 		self.initUI()
 		
 	def initUI(self):
-		self.uiList = [infinityEditorUI.infinityEditorWidget(self,self.panelname),filterGEUI.FilterWidget(self,self.panelname),sorceButton.sorceButtonWidget(self),tanEditorUI.EditorWidget(self),ScaleKeyUI.ScaleKeyUI(self)]
+		self.uiList = [	infinityEditorUI.infinityEditorWidget(self,self.panelname),
+						filterGEUI.FilterWidget(self,self.panelname),
+						sorceButton.sorceButtonWidget(self),
+						tanEditorUI.EditorWidget(self),
+						scaleKeysEditorUI.ScaleKeysEditorWidget(self),
+						keysEditFromBufferUI.KeysEditFromBufferWidget(self,self.panelname)]
 		self.uiList[1].setFixedSize(180,100)
 		
 		vlay_a = QVBoxLayout()
 		vlay_a.addWidget(self.uiList[1])
 		vlay_a.addWidget(self.uiList[2])
+
+		vlay_b = QVBoxLayout()
+		vlay_b.addWidget(self.uiList[4])
+		vlay_b.addWidget(self.uiList[5])
+		vlay_b.setSpacing(0)
+		vlay_b.setContentsMargins(0, 0, 0, 0)
 		
 		hlay = QHBoxLayout()
 		
 		hlay.addWidget(self.uiList[0])
 		hlay.addLayout(vlay_a)
 		hlay.addWidget(self.uiList[3])
-		hlay.addWidget(self.uiList[4])
+		hlay.addLayout(vlay_b)
 		
 		
 		self.setLayout(hlay)
