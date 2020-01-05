@@ -2,42 +2,45 @@
 # -*- coding: utf-8 -*-
 
 import sys
-try:
-	from PySide.QtCore import *
-	from PySide.QtGui import *
-	from shiboken import wrapInstance
-except ImportError:
-	try:
-		from PySide2.QtCore import *
-		from PySide2.QtGui import *
-		from PySide2.QtWidgets import *
-		from shiboken2 import wrapInstance
-	except ImportError:
-		# Failed import to PySide and PySide2.
-		raise ImportError('No module named PySide and PySide2.')
+
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
+from shiboken2 import wrapInstance
+
 import maya.cmds as cmds
 import maya.OpenMayaUI as OpenMayaUI
 
 def getSorceObj():
 	curveName = cmds.keyframe(q=True,sl=True,name=True)
 	obj = []
-	if curveName is not None:
+	if curveName:
 		for c in curveName:
-			obj.extend(getConnectedObject(c))
+			tmplist = getConnectedObject(c,0)
+			if tmplist:
+				obj.extend(tmplist)
 		return list(set(obj))
 	return None
 	
-def getConnectedObject(node):
-    result = []
-    
-    dists = cmds.listConnections(node,s=False,d=True)
-    targets = cmds.ls(dists, tr = True, shapes = True)
-    if targets:
-        return targets
-    else:
-        for dist in dists:
-            result.extend(getConnectedObject(dist))
-        return result
+def getConnectedObject(node,count):
+	result = []
+	count = count + 1
+	if count > 50:############### countでループの判断　スクリプトがバグらない処理　これ以上ループが増える前提なら数を増やす
+		return None
+	dests = cmds.listConnections(node,s=False,d=True)
+	targets = cmds.ls(dests, tr = True, shapes = True , type = ["network","reference"])
+	if targets:
+		return targets
+	elif dests:
+		for dest in dests:
+			tmplist = getConnectedObject(dest,count)
+			if tmplist:
+				result.extend(tmplist)
+			else:
+				return None
+		return result
+	else:
+		return [node]
 	
 	
 def selectObj():

@@ -2,25 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import sys
-try:
-	from PySide.QtCore import *
-	from PySide.QtGui import *
-	from shiboken import wrapInstance
-except ImportError:
-	try:
-		from PySide2.QtCore import *
-		from PySide2.QtGui import *
-		from PySide2.QtWidgets import *
-		from shiboken2 import wrapInstance
-	except ImportError:
-		# Failed import to PySide and PySide2.
-		raise ImportError('No module named PySide and PySide2.')
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
+from shiboken2 import wrapInstance
 import maya.OpenMayaUI as OpenMayaUI
 import maya.cmds as cmds
 from . import editTangent
 from ..manuWidget import boxSliderWidget as boxSliderWidget
-reload(boxSliderWidget)
-reload(editTangent)
 
 class EditorUI(QMainWindow):
 	def __init__(self,parent=None):
@@ -136,6 +125,11 @@ class TanSliderWidget(QWidget):
 			self.boxSlider.slider.setValue(editTangent.get_angle(io) * 100)
 			self.boxSlider.dspinBox.setValue(editTangent.get_angle(io))
 			self.boxSlider.blockSignals(False)
+		else:
+			self.boxSlider.blockSignals(True)
+			self.boxSlider.slider.setValue(0)
+			self.boxSlider.dspinBox.setValue(0)
+			self.boxSlider.blockSignals(False)
 		
 class WgtSliderWidget(TanSliderWidget):
 	def __init__(self,parent=None):
@@ -220,6 +214,11 @@ class WgtSliderWidget(TanSliderWidget):
 			self.boxSlider.blockSignals(True)
 			self.boxSlider.slider.setValue(editTangent.get_weight(io) * 100)
 			self.boxSlider.dspinBox.setValue(editTangent.get_weight(io))
+			self.boxSlider.blockSignals(False)
+		else:
+			self.boxSlider.blockSignals(True)
+			self.boxSlider.slider.setValue(0)
+			self.boxSlider.dspinBox.setValue(0)
 			self.boxSlider.blockSignals(False)
 
 

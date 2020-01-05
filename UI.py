@@ -1,7 +1,7 @@
-import os
-from maya import cmds
+import os,sys
+from maya import cmds, mel
 from maya import OpenMayaUI as omui
-from maya.app.general import mayaMixin
+from PySide2 import QtCore,QtGui,QtWidgets
 
 from .tangentEditor import tanEditorUI
 from .keysEditFromBuffer import keysEditFromBufferUI
@@ -9,67 +9,13 @@ from .scaleKeysEditor import scaleKeysEditorUI
 from .filterGraphEditor import filterGEUI
 from .selectionCurveSorce import sorceButton
 from .infinityCurveEditor import infinityEditorUI
-reload(infinityEditorUI)
-reload(sorceButton)
-reload(tanEditorUI)
-reload(scaleKeysEditorUI)
-reload(keysEditFromBufferUI)
-reload(filterGEUI)
-
-try:
-	# Check import PySide
-	from PySide.QtCore import *
-	from PySide.QtDeclarative import *
-	from PySide.QtGui import *
-	from PySide.QtHelp import *
-	from PySide.QtMultimedia import *
-	from PySide.QtNetwork import *
-	from PySide.QtOpenGL import *
-	from PySide.QtScript import *
-	from PySide.QtScriptTools import *
-	from PySide.QtSql import *
-	from PySide.QtSvg import *
-	from PySide.QtTest import *
-	from PySide.QtUiTools import *
-	from PySide.QtWebKit import *
-	from PySide.QtXml import *
-	from PySide.QtXmlPatterns import *
-	from PySide.phonon import *
-	from shiboken import wrapInstance
-except ImportError:
-	try:
-		# Check import PySide2
-		from PySide2.QtCore import *
-		from PySide2.QtGui import *
-		from PySide2.QtHelp import *
-		from PySide2.QtMultimedia import *
-		from PySide2.QtNetwork import *
-		from PySide2.QtPrintSupport import *
-		from PySide2.QtQml import *
-		from PySide2.QtQuick import *
-		from PySide2.QtQuickWidgets import *
-		from PySide2.QtScript import *
-		from PySide2.QtSql import *
-		from PySide2.QtSvg import *
-		from PySide2.QtTest import *
-		from PySide2.QtUiTools import *
-		from PySide2.QtWebChannel import *
-		from PySide2.QtWebKit import *
-		from PySide2.QtWebKitWidgets import *
-		from PySide2.QtWebSockets import *
-		from PySide2.QtWidgets import *
-		from PySide2.QtXml import *
-		from PySide2.QtXmlPatterns import *
-		from shiboken2 import wrapInstance
-	except ImportError:
-		# Failed import to PySide and PySide2.
-		raise ImportError('No module named PySide and PySide2.')
 		
-class AddToolWidget(QWidget):
-	def __init__(self,parent,panelname,*args,**kwargs):
+cmds.optionVar(iv=["customGraphEditorVis",0])
+class AddToolWidget(QtWidgets.QWidget):
+	def __init__(self,parent,panelname,rowColumn,*args,**kwargs):
 		super(AddToolWidget,self).__init__(parent)
 		self.panelname = panelname
-		self.setFixedHeight(150)
+		self.rowColumn = rowColumn
 		self.initUI()
 		
 	def initUI(self):
@@ -81,119 +27,138 @@ class AddToolWidget(QWidget):
 						keysEditFromBufferUI.KeysEditFromBufferWidget(self,self.panelname)]
 		self.uiList[1].setFixedSize(180,100)
 		
-		vlay_a = QVBoxLayout()
+		vlay_a = QtWidgets.QVBoxLayout()
 		vlay_a.addWidget(self.uiList[1])
 		vlay_a.addWidget(self.uiList[2])
 
-		vlay_b = QVBoxLayout()
+		vlay_b = QtWidgets.QVBoxLayout()
 		vlay_b.addWidget(self.uiList[4])
 		vlay_b.addWidget(self.uiList[5])
 		vlay_b.setSpacing(0)
 		vlay_b.setContentsMargins(0, 0, 0, 0)
 		
-		hlay = QHBoxLayout()
+		if self.rowColumn == "row":
+			self.setFixedHeight(150)
+			mainLay = QtWidgets.QHBoxLayout()
+			mainLay.addWidget(self.uiList[0])
+			mainLay.addLayout(vlay_a)
+			mainLay.addWidget(self.uiList[3])
+			mainLay.addLayout(vlay_b)
+		else:
+			self.setFixedHeight(300)
+			mainLay = QtWidgets.QVBoxLayout()
+			hlay_a = QtWidgets.QHBoxLayout()
+			hlay_a.addWidget(self.uiList[0])
+			hlay_a.addLayout(vlay_a)
+			hlay_a.addLayout(vlay_b)
+			mainLay.addWidget(self.uiList[3])
+			mainLay.addLayout(hlay_a)
+		self.setLayout(mainLay)
+			
 		
-		hlay.addWidget(self.uiList[0])
-		hlay.addLayout(vlay_a)
-		hlay.addWidget(self.uiList[3])
-		hlay.addLayout(vlay_b)
-		
-		
-		self.setLayout(hlay)
-		
-	def closeEvent(self, e):
+	def closeEvent(self, event):
 		try:
 			for ui in self.uiList:
 				ui.close()
 		except:
 			pass
 		
-class GraphEditor(QWidget):
-	def __init__(self,parent,panelname, *args, **kwargs):
-		super(GraphEditor, self).__init__(parent)
+class DockMainWindow(QtWidgets.QMainWindow):
+	def __init__(self,parent = None, panelname = "graphEditor1",rowColumn="row", *args, **kwargs):
+		super(DockMainWindow, self).__init__(parent=parent, *args, **kwargs)
+		self.setWindowTitle("Custom Graph Editor")
+		self.rowColumn = rowColumn
 		
 		self.panelname = panelname
-		self.paneName = "GE_ui_paneLayout"
-		cmds.setParent('MayaWindow')
-		
-		if cmds.paneLayout(self.paneName,ex=True):###This paneLayout is required for findPanelPopupParent.mel###
-			cmds.deleteUI(self.paneName)
-		paneLayout = cmds.paneLayout(self.paneName, configuration = "single" )
-			
-		if cmds.scriptedPanel(self.panelname,ex=True):
-			cmds.deleteUI(self.panelname)
-		graphEditor = cmds.scriptedPanel(self.panelname,type='graphEditor',unParent=True)
-		
-		cmds.scriptedPanel(self.panelname,e=True,parent=paneLayout )
-		ptr = omui.MQtUtil.findControl(paneLayout)
-		widget = wrapInstance(long(ptr), QWidget)
-		
-		layout = QVBoxLayout(self)
-		layout.setContentsMargins(0, 0, 0, 0)
-		layout.addWidget(widget)
-		
-	def closeEvent(self, e):
-		if cmds.paneLayout(self.paneName,ex=True):
-			cmds.deleteUI(self.paneName)
-		if cmds.scriptedPanel(self.panelname,ex=True):
-			cmds.deleteUI(self.panelname)
-		
-class MainWindow(QMainWindow):
-	settingFilename = "graphEditorWindow.ini"
-	def __init__(self, *args, **kwargs):
-		ptr = omui.MQtUtil.mainWindow()
-		parent = wrapInstance(long(ptr),QWidget)
-		super(MainWindow, self).__init__(parent)
-		
-		self.setWindowTitle("Custom Graph Editor")
-		filename = os.path.join(os.path.dirname(__file__),"uisetting",self.settingFilename)
-		self.__settings = QSettings(filename, QSettings.IniFormat)
-		self.__settings.setIniCodec('utf-8')
+		self.setObjectName("AddToolsDockWindow")
 		
 		self.initUI()
 	
 	def initUI(self):
-		panelname = "graphEditor1"
-		widget = QWidget(self)
-		vlay = QVBoxLayout(self)
-		self.graphEditor = GraphEditor(self,panelname)
-		self.addTools = AddToolWidget(self,panelname)
+		widget = QtWidgets.QWidget(self)
+		vlay = QtWidgets.QVBoxLayout(self)
+		self.addTools = AddToolWidget(self,self.panelname,self.rowColumn)
+		if self.rowColumn == "row":
+			self.setFixedHeight(self.addTools.maximumHeight())
+		else:
+			self.setMinimumHeight(self.addTools.maximumHeight())
+			self.setFixedWidth(520)
 		
-		vlay.addWidget(self.graphEditor)
 		vlay.addWidget(self.addTools)
 		vlay.setContentsMargins(0, 0, 0, 0)
 		vlay.setSpacing(0)
 		widget.setLayout(vlay)
+		vlay.setObjectName("customGraphEditor_layout")
 		
 		self.setCentralWidget(widget)
-		
-		
-	def restore(self):
-		self.restoreGeometry(self.__settings.value('geometry'))
-
-	def show(self):
-		self.restore()
-		super(MainWindow, self).show()
 	
-	def closeEvent(self, e):
-		global customGraphEditor
+	def closeEvent(self, event):
 		try:
 			self.addTools.close()
 		except:
 			pass
-		try:
-			self.graphEditor.close()
-		except:
-			pass
-		self.__settings.setValue('geometry', self.saveGeometry())
-		customGraphEditor = None
-		super(self.__class__, self).closeEvent(e)
 	
-def main():
+def changeRowColumn(parent = None,panelname=None,*args):
+	paneName = panelname + "CustomPane"
+	if cmds.paneLayout(paneName,exists =True):
+		cmds.deleteUI(paneName)
+	cmds.paneLayout(paneName,parent = parent)
+	if cmds.optionVar(q = "customGraphEditorVis"):
+		if cmds.optionVar(q = "customGraphEditorLayout") == "column":
+			cmds.optionVar(sv = ["customGraphEditorLayout","row"])
+		else:
+			cmds.optionVar(sv = ["customGraphEditorLayout","column"])
+	if cmds.optionVar(q = "customGraphEditorLayout") == "row":
+		cmds.paneLayout(paneName,e = True,configuration = "horizontal2")
+	else:
+		cmds.paneLayout(paneName,e = True,configuration = "vertical2")
+	if cmds.scriptedPanel(panelname, exists=True):
+		cmds.deleteUI(panelname)
+	cmds.scriptedPanel(panelname,parent = paneName,type="graphEditor")
+	cmds.optionVar(iv=["customGraphEditorVis",1])
+	return paneName
+
+def addWidgetToMayaWindow(graphWindowName,panelname):
 	global customGraphEditor
+	parentLayout = changeRowColumn(parent=graphWindowName,panelname = panelname)
+	rowColumn = cmds.optionVar(q = "customGraphEditorLayout")
+	
+	cmds.workspaceControl(graphWindowName,e=True,vcc=closeAddWindow)
+	
+	customGraphEditor = DockMainWindow(panelname = panelname,rowColumn = rowColumn)
+	customGraphEditor.show()
+	
+	print "PanelName  : %s"%(panelname)
+	print "WindowName : %s"%(graphWindowName)
+	print "Layout     : %s"%(rowColumn)
+	
+	geLayout = omui.MQtUtil.findLayout(parentLayout)
+	storedControl = omui.MQtUtil.findControl(customGraphEditor.objectName())
+	omui.MQtUtil.addWidgetToMayaLayout(long(storedControl),long(geLayout))
+
+def closeAddWindow(*args):
 	try:
-		customGraphEditor.close()
+		global customGraphEditor
+		graphWindowName = "customGraphEditorWindow"
+		panelname = "graphEditor1"
+		if not cmds.workspaceControl(graphWindowName,q=True,visible=True):
+			cmds.optionVar(iv=["customGraphEditorVis",0])
+			cmds.deleteUI(panelname)
+			customGraphEditor.close()
+			print "##Closed Tools Widget##"
 	except:
 		pass
-	customGraphEditor = MainWindow()
-	customGraphEditor.show()
+		
+def main():
+	graphWindowName = "customGraphEditorWindow"
+	panelname = "graphEditor1"
+	winVis = cmds.workspaceControl(graphWindowName,exists=True)
+	
+	if cmds.workspaceControl(graphWindowName,ex=True):
+		cmds.deleteUI(graphWindowName)
+	if cmds.window(panelname+"Window",exists=True):
+		cmds.deleteUI(panelname+"Window")
+		
+	cmds.optionVar(iv = ["customGraphEditorVis",winVis])
+	
+	cmds.workspaceControl(graphWindowName,label="Custom Graph Editor",retain=False,dup=False,uiScript = "from customGraphEditor import UI;UI.addWidgetToMayaWindow('%s','%s')"%(graphWindowName,panelname))

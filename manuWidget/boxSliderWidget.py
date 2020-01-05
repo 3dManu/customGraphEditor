@@ -24,7 +24,6 @@ def undo_widget():
 def redo_widget():
 	cmds.redo()
 
-
 class BoxSliderWidget(QWidget):
 	valueChanged = Signal(float)
 	def __init__(self,parent=None,minRange=-1,maxRange=1,decimals=2,step=0.1):
@@ -37,6 +36,9 @@ class BoxSliderWidget(QWidget):
 		self.dspinBox = QDoubleSpinBox(self)
 		
 		self.dspinBox.installEventFilter(self)
+		self.slider.installEventFilter(self)
+		self.slider.setMouseTracking(True)
+		
 		self.setFocusPolicy(Qt.StrongFocus)
 		
 		self.chunkChk = False
@@ -48,20 +50,79 @@ class BoxSliderWidget(QWidget):
 		self.connect_to_slot()
 
 	def slider_ui(self):
-		self.sliderMinRange = self.minRange * (10**self.decimals)
-		self.sliderMaxRange = self.maxRange * (10**self.decimals)
-		self.slider.setRange(self.sliderMinRange,self.sliderMaxRange)
-		self.dspinBox.setRange(self.minRange,self.maxRange)
-		self.dspinBox.setDecimals(self.decimals)
-		self.dspinBox.setSingleStep(self.step)
+		
+		self.sliderSetDefalut()
 		self.dspinBox.setKeyboardTracking(False)
-
+		
+		self.slider.sliderReleased.connect(self.modeChkFunction)
+		self.slider.sliderPressed.connect(self.modeChkFunction)
+		
 		self.hLayout = QHBoxLayout()
 		self.hLayout.setContentsMargins(0, 0, 0, 0)
 		
 		self.hLayout.addWidget(self.dspinBox)
 		self.hLayout.addWidget(self.slider)
 		self.setLayout(self.hLayout)
+		
+	def modeChkFunction(self):
+		if QApplication.queryKeyboardModifiers() == Qt.ControlModifier:
+			self.sliderSetDetail(10)
+		elif QApplication.queryKeyboardModifiers() == (Qt.ControlModifier | Qt.ShiftModifier):
+			self.sliderSetDetail(1)
+		elif QApplication.queryKeyboardModifiers() == Qt.ShiftModifier:
+			self.sliderSetDetail(100)
+		else:
+			self.sliderSetDefalut()
+	
+	def sliderSetDefalut(self):
+		curValue = self.dspinBox.value()
+		
+		self.decimals = self.decimals
+		self.sliderMinRange = self.minRange * (10**self.decimals)
+		self.sliderMaxRange = self.maxRange * (10**self.decimals)
+		self.slider.setRange(self.sliderMinRange,self.sliderMaxRange)
+		self.dspinBox.setRange(self.minRange,self.maxRange)
+		self.dspinBox.setDecimals(self.decimals)
+		self.dspinBox.setSingleStep(self.step)
+		
+		self.slider.setStyleSheet("")
+		
+		self.dspinBox.setValue(curValue)
+		self.slider.setValue(curValue*(10**self.decimals))
+			
+	
+	def sliderSetDetail(self,detail=10):
+		curValue = self.dspinBox.value()
+		
+		self.decimals = self.decimals
+		
+		editSpinMin = curValue-(self.step*detail)
+		editSpinMax = curValue+(self.step*detail)
+		
+		if editSpinMin < self.minRange:
+			editSpinMin = self.minRange
+		if editSpinMax > self.maxRange:
+			editSpinMax = self.maxRange
+		
+		editSliderMin = editSpinMin * (10**self.decimals)
+		editSliderMax = editSpinMax * (10**self.decimals)
+		
+		self.dspinBox.setRange(editSpinMin,editSpinMax)
+		self.slider.setRange(editSliderMin,editSliderMax)
+		
+		self.slider.setStyleSheet(
+			"QSlider::groove:horizontal{"
+				"border:3px groove #4d6b7e; height:8px; margin:2px 0;border-radius:3px;"
+				"background:#2b2b2b;}"
+			
+			"QSlider::handle:horizontal {"
+				"border:1px solid #5c5c5c; width:18px; margin:-2px 0;  border-radius:3px;"
+				"background:#bdbdbd;}"
+		)
+		
+		self.dspinBox.setValue(curValue)
+		self.slider.setValue(curValue*(10**self.decimals))
+			
 	
 	def connect_to_slot(self):
 		self.slider.valueChanged[int].connect(self.valueChanged_callBack)
@@ -113,13 +174,13 @@ class BoxSliderWidget(QWidget):
 			closeChunk_widget('editBoxSlider')
 			self.chunkChk = False
 	
-	def focusOutEvent(self,e):
+	def focusOutEvent(self,event):
 		self.closed_chunk()
 		
-	def eventFilter(self, obj, e):
-		if e.type() == QEvent.KeyPress:
-			key = e.key()
-			mod = e.modifiers()
+	def eventFilter(self, obj, event):
+		if event.type() == QEvent.KeyPress:
+			key = event.key()
+			mod = event.modifiers()
 			if key == Qt.Key_Z and mod == Qt.ShiftModifier:
 				self.closed_chunk()
 				redo_widget()
@@ -129,4 +190,19 @@ class BoxSliderWidget(QWidget):
 			else:
 				return False
 			return True
+		
+		elif event.type() == QEvent.MouseButtonPress:
+			self.modeChkFunction()
+			return False
+			
+		elif event.type() == QEvent.Enter:
+			self.modeChkFunction()
+			return True
+			
+		elif event.type() == QEvent.Leave:
+			if not self.slider.isSliderDown():
+				self.sliderSetDefalut()
+			return True
+				
+
 		return False

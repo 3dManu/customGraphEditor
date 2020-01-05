@@ -2,27 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import sys
-try:
-	from PySide.QtCore import *
-	from PySide.QtGui import *
-	from shiboken import wrapInstance
-except ImportError:
-	try:
-		from PySide2.QtCore import *
-		from PySide2.QtGui import *
-		from PySide2.QtWidgets import *
-		from shiboken2 import wrapInstance
-	except ImportError:
-		# Failed import to PySide and PySide2.
-		raise ImportError('No module named PySide and PySide2.')
+
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
+from shiboken2 import wrapInstance
+
 import maya.cmds as cmds
 import maya.mel as mel
 import maya.OpenMayaUI as OpenMayaUI
 
-def openChunk_widget(name):
-	cmds.undoInfo(openChunk=True,chunkName = name)
-def closeChunk_widget(name):
-	cmds.undoInfo(closeChunk=True,chunkName = name)
 def keys_editor_func(option,piv):
 	keyCount = cmds.keyframe(q=True, sl=True, kc=True)
 	if keyCount == 0:
@@ -88,9 +77,15 @@ class ScaleKeysEditorUI(QMainWindow):
 
 class RightClickButton(QPushButton):
 	rightClicked = Signal()
+	def mousePressEvent(self, e):
+		if e.button() == Qt.RightButton:
+			self.setStyleSheet("QPushButton{background-color:white;color:black;}")
+		else:
+			super(RightClickButton, self).mousePressEvent(e)
 	def mouseReleaseEvent(self, e):
 		if e.button() == Qt.RightButton:
-			self.rightClicked.emit()
+			self.rightClicked.emit()	
+			self.setStyleSheet("")
 		else:
 			super(RightClickButton, self).mouseReleaseEvent(e)
 			

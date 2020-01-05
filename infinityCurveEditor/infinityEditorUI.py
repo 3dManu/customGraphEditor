@@ -2,19 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import sys
-try:
-	from PySide.QtCore import *
-	from PySide.QtGui import *
-	from shiboken import wrapInstance
-except ImportError:
-	try:
-		from PySide2.QtCore import *
-		from PySide2.QtGui import *
-		from PySide2.QtWidgets import *
-		from shiboken2 import wrapInstance
-	except ImportError:
-		# Failed import to PySide and PySide2.
-		raise ImportError('No module named PySide and PySide2.')
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
+from shiboken2 import wrapInstance
 import maya.cmds as cmds
 import maya.mel as mel
 import maya.OpenMayaUI as OpenMayaUI
@@ -173,6 +164,7 @@ class infinityEditorWidget(QWidget):
 		self.poiConButton.setIcon(poiConIcon)
 		
 		iconSize = QSize(20,20)
+		
 		self.priCycButton.setIconSize(iconSize)
 		self.priCyOButton.setIconSize(iconSize)
 		self.priOscButton.setIconSize(iconSize)
@@ -184,6 +176,7 @@ class infinityEditorWidget(QWidget):
 		self.poiOscButton.setIconSize(iconSize)
 		self.poiLinButton.setIconSize(iconSize)
 		self.poiConButton.setIconSize(iconSize)
+		
 		
 		btnHSize = 22
 		btnWSize = 22

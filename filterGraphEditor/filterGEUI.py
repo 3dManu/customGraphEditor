@@ -1,19 +1,12 @@
 # -*- coding: utf-8 -*-
 import sys
 from maya import cmds, mel
-try:
-	from PySide.QtCore import *
-	from PySide.QtGui import *
-	from shiboken import wrapInstance
-except ImportError:
-	try:
-		from PySide2.QtCore import *
-		from PySide2.QtGui import *
-		from PySide2.QtWidgets import *
-		from shiboken2 import wrapInstance
-	except ImportError:
-		# Failed import to PySide and PySide2.
-		raise ImportError('No module named PySide and PySide2.')
+
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
+from shiboken2 import wrapInstance
+
 import maya.OpenMayaUI as omui
 		
 class FilterUI(QMainWindow):
@@ -39,7 +32,6 @@ class FilterWidget(QWidget):
 		self.setWindowTitle('Set Key')
 		
 		self.panelname = panelname
-		print "panelabelName :",panelname
 		
 		hLayout_A = QHBoxLayout()
 		hLayout_B = QHBoxLayout()
