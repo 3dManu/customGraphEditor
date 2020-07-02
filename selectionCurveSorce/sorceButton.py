@@ -16,32 +16,54 @@ def getSorceObj():
 	obj = []
 	if curveName:
 		for c in curveName:
-			tmplist = getConnectedObject(c,0)
+			tmplist = get_cnctFstTrgTypObj(c,["network","reference"],["message"],False)
 			if tmplist:
 				obj.extend(tmplist)
 		return list(set(obj))
 	return None
 	
-def getConnectedObject(node,count):
+def get_cnctFstTrgTypObj(node,trgType,extraAttr = None,searchType = False,count = 0,dupNode = None):
 	result = []
+	extraNode = []
 	count = count + 1
+	if extraAttr is None:
+		extraAttr = []
+	if dupNode is None:
+		dupNode = []
+	
 	if count > 50:############### countでループの判断　スクリプトがバグらない処理　これ以上ループが増える前提なら数を増やす
 		return None
-	dests = cmds.listConnections(node,s=False,d=True)
-	targets = cmds.ls(dests, tr = True, shapes = True , type = ["network","reference"])
+		
+	if extraAttr:
+		for ex in extraAttr:
+			if cmds.objExists(node+"."+ex):
+				tempList = cmds.listConnections(node+"."+ex,s=False,d=True)
+				if tempList:
+					extraNode.extend(tempList)
+		if searchType:
+			dests = extraNode
+		else:
+			dests = cmds.listConnections(node,s=False,d=True)
+			dests = list(set(dests) - set(extraNode))
+	else:
+		dests = cmds.listConnections(node,s=False,d=True)
+				
+	targets = cmds.ls(dests, tr = True, shapes = True , type = trgType)
 	if targets:
 		return targets
 	elif dests:
 		for dest in dests:
-			tmplist = getConnectedObject(dest,count)
+			if dest in dupNode:
+				continue
+			dupNode.append(dest)
+			tmplist = get_cnctFstTrgTypObj(dest,trgType,extraAttr,searchType,count,dupNode)
 			if tmplist:
 				result.extend(tmplist)
 			else:
-				return None
+				continue
 		return result
 	else:
 		return [node]
-	
 	
 def selectObj():
 	objNames = getSorceObj()
