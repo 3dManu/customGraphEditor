@@ -141,7 +141,7 @@ def closeAddWindow(*args):
 		global customGraphEditor
 		graphWindowName = "customGraphEditorWindow"
 		panelname = "graphEditor1"
-		if not cmds.workspaceControl(graphWindowName,q=True,r=True) and not cmds.workspaceControl(graphWindowName,q=True,visible=True):
+		if not cmds.workspaceControl(graphWindowName,q=True,r=True):
 			cmds.optionVar(iv=["customGraphEditorVis",0])
 			cmds.deleteUI(panelname)
 			customGraphEditor.close()
