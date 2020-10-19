@@ -103,62 +103,67 @@ def changeRowColumn(parent = None,panelname=None,*args):
 	if cmds.paneLayout(paneName,exists =True):
 		cmds.deleteUI(paneName)
 	cmds.paneLayout(paneName,parent = parent)
-	if cmds.optionVar(q = "customGraphEditorVis"):
-		if cmds.optionVar(q = "customGraphEditorLayout") == "column":
-			cmds.optionVar(sv = ["customGraphEditorLayout","row"])
-		else:
-			cmds.optionVar(sv = ["customGraphEditorLayout","column"])
-	if cmds.optionVar(q = "customGraphEditorLayout") == "row":
-		cmds.paneLayout(paneName,e = True,configuration = "horizontal2")
-	else:
+	
+	if cmds.optionVar(q = "customGraphEditorLayout") == "column":
 		cmds.paneLayout(paneName,e = True,configuration = "vertical2")
+	else:
+		cmds.paneLayout(paneName,e = True,configuration = "horizontal2")
+		
 	if cmds.scriptedPanel(panelname, exists=True):
 		cmds.deleteUI(panelname)
 	cmds.scriptedPanel(panelname,parent = paneName,type="graphEditor")
-	cmds.optionVar(iv=["customGraphEditorVis",1])
 	return paneName
 
+def changeLayot(graphWindowName,panelname):
+	global customGraphEditorWindow
+	customGraphEditorWindow.close()
+	
+	if cmds.optionVar(q = "customGraphEditorLayout") == "column":
+		cmds.optionVar(sv = ["customGraphEditorLayout","row"])
+	else:
+		cmds.optionVar(sv = ["customGraphEditorLayout","column"])
+	addWidgetToMayaWindow(graphWindowName,panelname)
+	
+	
 def addWidgetToMayaWindow(graphWindowName,panelname):
-	global customGraphEditor
+	global customGraphEditorWindow
 	parentLayout = changeRowColumn(parent=graphWindowName,panelname = panelname)
 	rowColumn = cmds.optionVar(q = "customGraphEditorLayout")
 	
-	cmds.workspaceControl(graphWindowName,e=True,vcc=closeAddWindow)
-	
-	customGraphEditor = DockMainWindow(panelname = panelname,rowColumn = rowColumn)
-	customGraphEditor.show()
+	customGraphEditorWindow = DockMainWindow(panelname = panelname,rowColumn = rowColumn)
+	cmds.workspaceControl(graphWindowName,e=True,cc="from customGraphEditor import UI;UI.closeAddWindow()")
+	customGraphEditorWindow.show()
 	
 	print "PanelName  : %s"%(panelname)
 	print "WindowName : %s"%(graphWindowName)
 	print "Layout     : %s"%(rowColumn)
 	
 	geLayout = omui.MQtUtil.findLayout(parentLayout)
-	storedControl = omui.MQtUtil.findControl(customGraphEditor.objectName())
+	storedControl = omui.MQtUtil.findControl(customGraphEditorWindow.objectName())
 	omui.MQtUtil.addWidgetToMayaLayout(long(storedControl),long(geLayout))
 
 def closeAddWindow(*args):
-	try:
-		global customGraphEditor
-		graphWindowName = "customGraphEditorWindow"
-		panelname = "graphEditor1"
-		if not cmds.workspaceControl(graphWindowName,q=True,r=True):
-			cmds.optionVar(iv=["customGraphEditorVis",0])
-			cmds.deleteUI(panelname)
-			customGraphEditor.close()
-			print "##Closed Tools Widget##"
-	except:
-		pass
+	global customGraphEditorWindow
+	graphWindowName = "customGraphEditorWindow"
+	panelname = "graphEditor1"
+	cmds.deleteUI(panelname)
+	cmds.deleteUI(graphWindowName)
+	customGraphEditorWindow.close()
+	print "##Closed Tools Widget##"
 		
 def main():
 	graphWindowName = "customGraphEditorWindow"
 	panelname = "graphEditor1"
-	winVis = cmds.workspaceControl(graphWindowName,exists=True)
 	
 	if cmds.workspaceControl(graphWindowName,ex=True):
-		cmds.deleteUI(graphWindowName)
-	if cmds.window(panelname+"Window",exists=True):
-		cmds.deleteUI(panelname+"Window")
+		print "Restore Window"
+		if cmds.workspaceControl(graphWindowName,q=True,r=True):
+			changeLayot(graphWindowName,panelname)
+		cmds.workspaceControl(graphWindowName,e=True,restore=True)
 		
-	cmds.optionVar(iv = ["customGraphEditorVis",winVis])
-	
-	cmds.workspaceControl(graphWindowName,label="Custom Graph Editor",retain=False,dup=False,uiScript = "from customGraphEditor import UI;UI.addWidgetToMayaWindow('%s','%s')"%(graphWindowName,panelname))
+	else:
+		print "New Window"
+		if cmds.window(panelname+"Window",exists=True):
+			cmds.deleteUI(panelname+"Window")
+		cmds.workspaceControl(graphWindowName,label="Custom Graph Editor",retain=True,dup=False,uiScript = "from customGraphEditor import UI;UI.addWidgetToMayaWindow('%s','%s')"%(graphWindowName,panelname))
+		
