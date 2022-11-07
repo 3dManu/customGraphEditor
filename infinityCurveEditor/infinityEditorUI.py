@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import sys
 from PySide2.QtCore import *
 from PySide2.QtGui import *
@@ -11,7 +15,6 @@ import maya.mel as mel
 import maya.OpenMayaUI as OpenMayaUI
 
 from . import resource
-reload(resource)
 
 def get_state_infinity(graphEd):
 	infinityState = cmds.animCurveEditor(graphEd,q=True,di=True)

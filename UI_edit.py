@@ -14,6 +14,9 @@ from .filterGraphEditor import filterGEUI
 from .selectionCurveSorce import sorceButton
 from .infinityCurveEditor import infinityEditorUI
 
+
+from shiboken2 import wrapInstance
+
 from PySide2 import QtCore,QtGui,QtWidgets
 		
 cmds.optionVar(iv=["customGraphEditorVis",0])
@@ -158,19 +161,8 @@ def closeAddWindow(*args):
 	print ("##Closed Tools Widget##")
 		
 def main():
-	graphWindowName = "customGraphEditorWindow"
-	panelname = "graphEditor1"
-	
-	if cmds.workspaceControl(graphWindowName,ex=True):
-		print ("Restore Window")
-		if cmds.workspaceControl(graphWindowName,q=True,r=True):
-			changeLayot(graphWindowName,panelname)
-		cmds.workspaceControl(graphWindowName,e=True,restore=True)
-		
-	else:
-		print ("New Window")
-		if cmds.window(panelname+"Window",exists=True):
-			cmds.deleteUI(panelname+"Window")
-		cmds.workspaceControl(graphWindowName,label="Custom Graph Editor",retain=True,dup=False,uiScript = "from customGraphEditor import UI;UI.addWidgetToMayaWindow('%s','%s')"%(graphWindowName,panelname))
-		
-		
+    ptr = omui.MQtUtil.mainWindow()
+    parent = wrapInstance(int(ptr),QtWidgets.QWidget)
+    app = QtWidgets.QApplication.instance()
+    ui = DockMainWindow(parent)
+    ui.show()

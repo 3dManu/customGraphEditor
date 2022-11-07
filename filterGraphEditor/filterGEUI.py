@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import sys
 from maya import cmds, mel
 
@@ -80,9 +84,9 @@ class FilterWidget(QWidget):
 			self.vecBtn[i].setCheckable(True)
 			self.vecBtn[i].setStyleSheet("QPushButton{color: %s;font-weight: bold;}"%btnColor[i%3])
 			self.vecBtn[i].toggled.connect(self.setFilterCommand)
-			if i/3 == 0:
+			if i//3 == 0:
 				hLayout_A.addWidget(self.vecBtn[i])
-			elif i/3 == 1:
+			elif i//3 == 1:
 				hLayout_B.addWidget(self.vecBtn[i])
 			else:
 				hLayout_C.addWidget(self.vecBtn[i])
@@ -138,7 +142,7 @@ def main():
 	ptr = omui.MQtUtil.findWindow(mayaWindow)
 	if ptr is None:
 		ptr = omui.MQtUtil.mainWindow()
-	parent = wrapInstance(long(ptr),QWidget)
+	parent = wrapInstance(int(ptr),QWidget)
 	app = QApplication.instance()
 	ui = FilterUI(parent)
 	ui.show()

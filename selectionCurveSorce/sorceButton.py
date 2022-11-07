@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import sys
 
 from PySide2.QtCore import *
@@ -128,7 +132,7 @@ def main():
 	mayaWindow = 'graphEditor1Window' #常にこのウィンドウより前にいます
 	ptr = OpenMayaUI.MQtUtil.findWindow(mayaWindow)
 	if ptr is not None:
-		parent = wrapInstance(long(ptr),QWidget)
+		parent = wrapInstance(int(ptr),QWidget)
 	else:
 		cmds.error('Please open the GraphEditor')
 	app = QApplication.instance()

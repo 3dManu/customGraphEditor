@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import sys
 
 from PySide2.QtCore import *
@@ -27,6 +31,8 @@ def keys_editor_func(option,piv):
 		scaleValue = -1
 	elif option == "offset":
 		pass
+	elif option == "same":
+		pass
 	else:
 		cmds.undoInfo(closeChunk=True,chunkName = "keys_editor_func")
 		return
@@ -45,6 +51,15 @@ def keys_editor_func(option,piv):
 		elif piv == "avg":
 			keyValues = cmds.keyframe(crv,q=True,sl=True,vc=True)
 			pivValue = (max(keyValues)+min(keyValues))/2
+		elif piv == "def":
+			keyValue = cmds.keyframe(crv,q=True,time=(timeArray[0],timeArray[0]),vc=True)[0]
+			attrName = cmds.listConnections("{0}.output".format(crv),s=False,d=True,p=True)[0]
+			pivValue = cmds.attributeQuery(attrName.split(".")[1],node = attrName.split(".")[0],listDefault=True)[0]
+		elif piv == "last":
+			pivValue = cmds.keyframe(q=True,lsl=True,vc=True)[0]
+		elif piv == "zero":
+			keyValue = cmds.keyframe(crv,q=True,sl=True,vc=True)[0]
+			pivValue = 0
 		else:
 			break
 		
@@ -53,6 +68,9 @@ def keys_editor_func(option,piv):
 			offsetValue = pivValue - keyValue
 			for slv in selectedValues:
 				cmds.keyframe(crv, relative = True, index = (slv,slv), vc = offsetValue)
+		elif option == "same":
+			for slv in selectedValues:
+				cmds.keyframe(crv, absolute = True, index = (slv,slv), vc = pivValue)
 		else:
 			for slv in selectedValues:
 				cmds.scaleKey(crv, index = (slv,slv), vp = pivValue, vs = scaleValue)
@@ -105,6 +123,9 @@ class ScaleKeysEditorWidget(QWidget):
 		self.offsetButton = RightClickButton("Offset",self)
 		self.avgButton = RightClickButton("Average",self)
 		self.negButton = RightClickButton("Negative",self)
+		self.defalutButton = RightClickButton("Default",self)
+		self.reverseButton = RightClickButton("Reverse",self)
+		self.sameButton = RightClickButton("Same",self)
 		
 		self.set_style_button()
 		
@@ -116,40 +137,56 @@ class ScaleKeysEditorWidget(QWidget):
 		
 		hLayout_A.addWidget(self.pushButton,alignment=(Qt.AlignHCenter))
 		hLayout_A.addWidget(self.pullButton,alignment=(Qt.AlignHCenter))
-		hLayout_A.addWidget(self.offsetButton,alignment=(Qt.AlignHCenter))
+		hLayout_A.addWidget(self.defalutButton,alignment=(Qt.AlignHCenter))
 		
 		hLayout_B = QHBoxLayout(self)
 		
-		hLayout_B.addWidget(self.avgButton,alignment=(Qt.AlignHCenter))
+		hLayout_B.addWidget(self.reverseButton,alignment=(Qt.AlignHCenter))
 		hLayout_B.addWidget(self.negButton,alignment=(Qt.AlignHCenter))
+		hLayout_B.addWidget(self.avgButton,alignment=(Qt.AlignHCenter))
+		
+		hLayout_C = QHBoxLayout(self)
+		
+		hLayout_C.addWidget(self.offsetButton,alignment=(Qt.AlignHCenter))
+		hLayout_C.addWidget(self.sameButton,alignment=(Qt.AlignHCenter))
 		
 		vLayout.addLayout(hLayout_A)
 		vLayout.addLayout(hLayout_B)
+		vLayout.addLayout(hLayout_C)
 		
 		self.setLayout(vLayout)
 		
-		self.pushButton.clicked.connect(self.button_cliced_callBack)
-		self.pullButton.clicked.connect(self.button_cliced_callBack)
-		self.offsetButton.clicked.connect(self.button_cliced_callBack)
-		self.avgButton.clicked.connect(self.button_cliced_callBack)
-		self.negButton.clicked.connect(self.button_cliced_callBack)
+		self.pushButton.clicked.connect(self.button_clicked_callBack)
+		self.pullButton.clicked.connect(self.button_clicked_callBack)
+		self.offsetButton.clicked.connect(self.button_clicked_callBack)
+		self.avgButton.clicked.connect(self.button_clicked_callBack)
+		self.negButton.clicked.connect(self.button_clicked_callBack)
+		self.defalutButton.clicked.connect(self.button_clicked_callBack)
+		self.reverseButton.clicked.connect(self.button_clicked_callBack)
+		self.sameButton.clicked.connect(self.button_clicked_callBack)
 		
-		self.pushButton.rightClicked.connect(self.button_rightCliced_callBack)
-		self.pullButton.rightClicked.connect(self.button_rightCliced_callBack)
-		self.offsetButton.rightClicked.connect(self.button_rightCliced_callBack)
-		self.avgButton.rightClicked.connect(self.button_rightCliced_callBack)
-		self.negButton.rightClicked.connect(self.button_rightCliced_callBack)
+		self.pushButton.rightClicked.connect(self.button_rightClicked_callBack)
+		self.pullButton.rightClicked.connect(self.button_rightClicked_callBack)
+		self.offsetButton.rightClicked.connect(self.button_rightClicked_callBack)
+		self.avgButton.rightClicked.connect(self.button_rightClicked_callBack)
+		self.negButton.rightClicked.connect(self.button_rightClicked_callBack)
+		self.defalutButton.rightClicked.connect(self.button_rightClicked_callBack)
+		self.reverseButton.rightClicked.connect(self.button_rightClicked_callBack)
+		self.sameButton.rightClicked.connect(self.button_rightClicked_callBack)
 		
 	def set_style_button(self):
 		btnHSize = 62
 		self.pushButton.setFixedWidth(btnHSize)
 		self.pullButton.setFixedWidth(btnHSize)
-		self.offsetButton.setFixedWidth(btnHSize)
-		btnHSize = 96
 		self.avgButton.setFixedWidth(btnHSize)
+		self.defalutButton.setFixedWidth(btnHSize)
+		self.reverseButton.setFixedWidth(btnHSize)
 		self.negButton.setFixedWidth(btnHSize)
+		btnHSize = 96
+		self.offsetButton.setFixedWidth(btnHSize)
+		self.sameButton.setFixedWidth(btnHSize)
 		
-	def button_cliced_callBack(self):
+	def button_clicked_callBack(self):
 		pivot = "left"
 		sender = self.sender()
 		if sender == self.pushButton:
@@ -163,9 +200,20 @@ class ScaleKeysEditorWidget(QWidget):
 			pivot = "avg"
 		elif sender == self.negButton:
 			option = "neg"
+		elif sender == self.defalutButton:
+			option = "pull"
+			pivot = "def"
+		elif sender == self.reverseButton:
+			option = "neg"
+			pivot = "zero"
+		elif sender == self.sameButton:
+			option = "same"
+			pivot = "last"
+		else:
+			return
 		keys_editor_func(option,pivot)
 		
-	def button_rightCliced_callBack(self):
+	def button_rightClicked_callBack(self):
 		pivot = "right"
 		sender = self.sender()
 		if sender == self.pushButton:
@@ -179,6 +227,17 @@ class ScaleKeysEditorWidget(QWidget):
 			pivot = "avg"
 		elif sender == self.negButton:
 			option = "neg"
+		elif sender == self.defalutButton:
+			option = "push"
+			pivot = "def"
+		elif sender == self.reverseButton:
+			option = "neg"
+			pivot = "zero"
+		elif sender == self.sameButton:
+			option = "same"
+			pivot = "avg"
+		else:
+			return
 		keys_editor_func(option,pivot)
 			
 def main():
@@ -186,7 +245,7 @@ def main():
 	ptr = OpenMayaUI.MQtUtil.findWindow(mayaWindow)
 	ptr = OpenMayaUI.MQtUtil.mainWindow()
 	if ptr is not None:
-		parent = wrapInstance(long(ptr),QWidget)
+		parent = wrapInstance(int(ptr),QWidget)
 	else:
 		cmds.error('Please open the GraphEditor')
 	app = QApplication.instance()
