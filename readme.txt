@@ -1,5 +1,5 @@
 Maya用カスタムグラフエディターです。
-ダウンロードは右上の緑色のClone or downloadのDownload zipからできると思います。
+ダウンロードは右上の緑色のCodeのDownload zipからできると思います。
 フォルダ名をcustomGraphEditor-masterからcustomGraphEditorに変更します。
 customGraphEditorのフォルダごとmaya>scriptの中に入れて
 
