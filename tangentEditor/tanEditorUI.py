@@ -368,7 +368,7 @@ class StrSliderWidget(QWidget):
             editTangent.set_angle_selected()
         elif sender == self.ioButton:
             editTangent.set_angle_io()
-        self.set_ui_value()
+        self.set_ui_value(None)
 
     def set_style_button(self):
         icon_path = os.path.join(os.path.dirname(__file__), r'..\icons')
@@ -400,11 +400,14 @@ class StrSliderWidget(QWidget):
             editTangent.set_angle_strain(self.radioIoGroup.checkedId(), self.boxSlider.dspinBox.value())
 
     def changed_selection(self):
-        self.set_ui_value()
+        self.set_ui_value(self.radioIo_A)
 
-    def set_ui_value(self):
-        # value = math.sqrt((1.5 - 0.2)/0.0005) = 48.99
-        value = 49
+    def set_ui_value(self, button):
+        if button is not None:
+            value = 0
+        else:
+            value = 49
+            # value = math.sqrt((1.5 - 0.2)/0.0005) = 48.99
         self.boxSlider.blockSignals(True)
         self.boxSlider.slider.setValue(value)
         self.boxSlider.dspinBox.setValue(value)
