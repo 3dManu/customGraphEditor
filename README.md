@@ -7,6 +7,8 @@ from customGraphEditor import UI
 
 UI.main("bottom")
 
+初回起動時はグラフエディターの下側で非表示になっていますが、境目をドラッグさせれば表示されます。
+
 エラーなど改良してほしいところなどありましたら、issuesに書き込んでいただくか、twitterの@3D_manuあてにメッセージお願いします。
 
 各種ツールの説明などはmanual.pdfに記載しています。
